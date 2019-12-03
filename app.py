@@ -52,7 +52,7 @@ ordered_features = OrderedDict([
     ('dinner', 0),
     ('latenight', 0),
     ('lunch', 0),
-    ('Vegan', 0),
+    ('vegan', 0),
     ('Mediterranean', 0),
     ('Indian', 0),
     ('Seafood', 0),
