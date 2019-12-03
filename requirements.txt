@@ -4,3 +4,5 @@ google_auth_oauthlib
 google_auth
 pandas
 requests
+sqlalchemy
+mysqlclient

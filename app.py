@@ -7,6 +7,8 @@ import googleapiclient.discovery
 from google.oauth2 import service_account
 from google_auth_oauthlib.flow import InstalledAppFlow
 
+from mysql import Engine
+
 app = Flask(__name__)
 
 google_project = 'yelp-final-260208'
@@ -16,7 +18,7 @@ google_yelp_model_logreg = 'rfc'
 
 SERVICE_ACCOUNT_FILE = 'credentials_service.json'
 SCOPES = ['https://www.googleapis.com/auth/cloud-platform']
-
+MYSQL_TABLE_NAME = 'active_learning'
 
 ordered_features = OrderedDict([
     ('review_count', 1),
@@ -91,7 +93,17 @@ def predict():
         if ordered_features[key] is not None:
             ordered_features[key] = request_map[key]
     csv_list = get_features_csv()
-    return predict_json(google_project, google_yelp_model_logreg, csv_list)
+    response = predict_json(google_project, google_yelp_model_logreg, csv_list)
+    active_learn(csv_list, response['predictions'][0])
+    return str(response['predictions'][0])
+
+
+def active_learn(csv_list, predicted_stars):
+    csv_list[0].insert(1, predicted_stars)
+    csv_list[0].append(1)
+    db = Engine.get_db_conn()
+    csv_str = str(csv_list).replace('[', '').replace(']', '')
+    db.execute('INSERT INTO {} VALUES ({})'.format(MYSQL_TABLE_NAME, csv_str))
 
 
 def predict_json(project, model, instances, version=None):
